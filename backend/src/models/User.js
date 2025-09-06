@@ -1,19 +1,27 @@
+// models/User.js (Single Schema Approach)
 import mongoose from "mongoose";
 
 const { Schema, model } = mongoose;
 
 const userSchema = new Schema(
   {
+    // --- Registration Fields ---
     fullName: { type: String, required: true },
-    gender: { type: String, required: true },
-    dob: { type: Date, required: true },
-    nationality: { type: String, required: true },
-    passportNumber: { type: String, required: true },
-    phone: { type: String, required: true },
     email: { type: String, required: true, unique: true },
+    password: { type: String, required: true, minlength: 6 },
+    
+    // Add a flag to track completion
+    isProfileComplete: { type: Boolean, default: false },
+
+    // --- Profile Fields (now optional on creation) ---
+    gender: { type: String },
+    dob: { type: Date },
+    nationality: { type: String },
+    passportNumber: { type: String },
+    phone: { type: String },
     emergencyContact: {
-      name: { type: String, required: true },
-      phone: { type: String, required: true },
+      name: { type: String },
+      phone: { type: String },
     },
     reasonForVisit: { type: String },
     friendInIndia: {
@@ -25,8 +33,6 @@ const userSchema = new Schema(
       conditions: { type: String },
     },
     preferredLanguage: { type: String },
-
-    password: { type: String, required: true, minlength: 6 },
   },
   { timestamps: true }
 );

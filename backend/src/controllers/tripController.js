@@ -1,4 +1,5 @@
 import Trip from "../models/Trip.js";
+import History from "../models/History.js";
 
 // Create a new trip
 export const createTrip = async (req, res) => {
@@ -57,6 +58,59 @@ export const updateVisitStatus = async (req, res) => {
     await trip.save();
 
     res.status(200).json({ message: "Destination marked as visited.", trip });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Edit trip (update name or destinations)
+export const editTrip = async (req, res) => {
+  try {
+    const { tripId } = req.params;
+    const { tripName, tripDestinations } = req.body;
+
+    const trip = await Trip.findById(tripId);
+    if (!trip) return res.status(404).json({ message: "Trip not found." });
+
+    if (tripName) trip.tripName = tripName;
+
+    if (tripDestinations && tripDestinations.length > 0) {
+      trip.tripDestinations = tripDestinations.map((dest, index) => ({
+        destinationId: dest,
+        order: index + 1,
+        visitStatus: false, // reset visitStatus on edit
+      }));
+    }
+
+    await trip.save();
+    res.status(200).json({ message: "Trip updated successfully.", trip });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+// Mark trip as complete → move to history
+export const completeTrip = async (req, res) => {
+  try {
+    const { tripId } = req.params;
+
+    const trip = await Trip.findById(tripId);
+    if (!trip) return res.status(404).json({ message: "Trip not found." });
+
+    // Move trip data to History
+    await History.create({
+      userId: trip.userId,
+      tripName: trip.tripName,
+      tripDestinations: trip.tripDestinations,
+    });
+
+    // Delete trip from active trips
+    await Trip.findByIdAndDelete(tripId);
+
+    res.status(200).json({ message: "Trip completed and moved to history." });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });

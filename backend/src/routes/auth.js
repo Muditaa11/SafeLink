@@ -2,28 +2,14 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js"; // adjust the path if needed
-import authMiddleware from "../middleware/auth.js";
+
 
 const router = express.Router();
 
 // ✅ Register Route
 router.post("/register", async (req, res) => {
   try {
-    const {
-      fullName,
-      gender,
-      dob,
-      nationality,
-      passportNumber,
-      phone,
-      email,
-      emergencyContact,
-      reasonForVisit,
-      friendInIndia,
-      healthInfo,
-      preferredLanguage,
-      password
-    } = req.body;
+    const { fullName, email, password } = req.body;
 
     // Check if user exists
     const existingUser = await User.findOne({ email });
@@ -36,17 +22,7 @@ router.post("/register", async (req, res) => {
     // Create user
     const newUser = new User({
       fullName,
-      gender,
-      dob,
-      nationality,
-      passportNumber,
-      phone,
       email,
-      emergencyContact,
-      reasonForVisit,
-      friendInIndia,
-      healthInfo,
-      preferredLanguage,
       password: hashedPassword
     });
 
@@ -88,15 +64,6 @@ router.post("/login", async (req, res) => {
 });
 
 // ✅ Protected Route Example
-router.get("/profile", authMiddleware, async (req, res) => {
-  try {
-    // Use decoded id from token if middleware attaches decoded, not full user
-    const userId = req.user._id;
-    const user = await User.findById(userId).select("-password");
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error });
-  }
-});
+
 
 export default router;
