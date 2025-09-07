@@ -7,7 +7,7 @@ const router = express.Router();
 // @route   GET /api/users/me
 // @desc    Get current user's data
 // @access  Private
-router.get("/profile", authMiddleware, async (req, res) => {
+router.get("/me", authMiddleware, async (req, res) => {
   try {
     // Use decoded id from token if middleware attaches decoded, not full user
     const userId = req.user._id;

@@ -28,7 +28,7 @@ const userSchema = new Schema(
       name: { type: String },
       contact: { type: String },
     },
-    healthInfo: {
+    healthInfo: { 
       allergies: { type: String },
       conditions: { type: String },
     },

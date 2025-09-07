@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 import Destination from "../src/models/Destination.js"; 
 
 // 1. MongoDB connection
-const mongoURI = "mongodb+srv://muditaa11:inerworld@cluster0.6evjuvc.mongodb.net/safelink_a?retryWrites=true&w=majority&appName=Cluster0"; // Replace with your URI
+const mongoURI = "mongodb+srv://muditaa11:inerworld@cluster0.6evjuvc.mongodb.net/safelink_a?retryWrites=true&w=majority&appName=Cluster0";
 
 mongoose.connect(mongoURI, {
   useNewUrlParser: true,

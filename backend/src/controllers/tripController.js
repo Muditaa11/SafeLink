@@ -1,10 +1,10 @@
 import Trip from "../models/Trip.js";
-import History from "../models/History.js";
 
 // Create a new trip
 export const createTrip = async (req, res) => {
   try {
-    const { userId, tripName, tripDestinations } = req.body;
+    const { tripName, tripDestinations } = req.body;
+    const userId = req.user._id;
 
     if (!tripName || !tripDestinations || !tripDestinations.length) {
       return res.status(400).json({ message: "Trip name and destinations are required." });
@@ -30,11 +30,11 @@ export const createTrip = async (req, res) => {
   }
 };
 
-// Fetch all trips for a user
+// Fetch trips that are active for a user
 export const getUserTrips = async (req, res) => {
   try {
     const { userId } = req.params;
-    const trips = await Trip.find({ userId }).populate("tripDestinations.destinationId", "name state location");
+    const trips = await Trip.find({ userId, tripStatus: "active"  }).populate("tripDestinations.destinationId", "name state location");
 
     res.status(200).json(trips);
   } catch (err) {
@@ -50,6 +50,11 @@ export const updateVisitStatus = async (req, res) => {
 
     const trip = await Trip.findById(tripId);
     if (!trip) return res.status(404).json({ message: "Trip not found." });
+
+     // Only allow updates if trip is active
+    if (trip.tripStatus !== "active") {
+      return res.status(403).json({ message: "Cannot update destinations of a completed trip." });
+    }
 
     const dest = trip.tripDestinations.find(d => d.destinationId.toString() === destinationId);
     if (!dest) return res.status(404).json({ message: "Destination not found in this trip." });
@@ -73,6 +78,11 @@ export const editTrip = async (req, res) => {
     const trip = await Trip.findById(tripId);
     if (!trip) return res.status(404).json({ message: "Trip not found." });
 
+     // ✅ Restrict editing if the trip is not active
+    if (trip.tripStatus !== "active") {
+      return res.status(403).json({ message: "Only active trips can be edited." });
+    }
+
     if (tripName) trip.tripName = tripName;
 
     if (tripDestinations && tripDestinations.length > 0) {
@@ -92,27 +102,58 @@ export const editTrip = async (req, res) => {
 };
 
 
-// Mark trip as complete → move to history
 export const completeTrip = async (req, res) => {
   try {
-    const { tripId } = req.params;
+    const { tripId, destinationId } = req.body;
 
     const trip = await Trip.findById(tripId);
     if (!trip) return res.status(404).json({ message: "Trip not found." });
 
-    // Move trip data to History
-    await History.create({
-      userId: trip.userId,
-      tripName: trip.tripName,
-      tripDestinations: trip.tripDestinations,
+    // Only allow updates if trip is active
+    if (trip.tripStatus !== "active") {
+      return res.status(403).json({ message: "Cannot update destinations of a completed trip." });
+    }
+
+    const dest = trip.tripDestinations.find(d => d.destinationId.toString() === destinationId);
+    if (!dest) return res.status(404).json({ message: "Destination not found in this trip." });
+
+    dest.visitStatus = true;
+
+    // Check if all destinations are visited
+    const allVisited = trip.tripDestinations.every(d => d.visitStatus === true);
+
+    // If all visited, mark trip as complete
+    if (allVisited) {
+      trip.tripStatus = "complete";
+    }
+
+    await trip.save();
+
+    res.status(200).json({ 
+      message: allVisited 
+        ? "Destination marked as visited. Trip is now complete!" 
+        : "Destination marked as visited.", 
+      trip 
     });
-
-    // Delete trip from active trips
-    await Trip.findByIdAndDelete(tripId);
-
-    res.status(200).json({ message: "Trip completed and moved to history." });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
+// Fetch completed trips for a user
+export const getUserCompletedTrips = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const completedTrips = await Trip.find({ userId, tripStatus: "complete" })
+      .populate("tripDestinations.destinationId", "name state location");
+
+    res.status(200).json(completedTrips);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+

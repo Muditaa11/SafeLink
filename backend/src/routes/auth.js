@@ -63,7 +63,6 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// ✅ Protected Route Example
 
 
 export default router;

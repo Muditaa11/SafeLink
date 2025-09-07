@@ -10,6 +10,11 @@ const tripSchema = new mongoose.Schema({
       order: { type: Number, required: true }, // Optional: helps keep the order of stops
     },
   ],
+  tripStatus: {
+    type: String,
+    enum: ["active", "complete"],
+    default: "active", // Default status is active
+  },
   createdAt: { type: Date, default: Date.now },
 });
 
