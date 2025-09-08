@@ -45,6 +45,7 @@ export const getMyActiveTrips = async (req, res) => {
 };
 
 // Update visitStatus for a destination in a trip (for geofencing)
+//this no longer used as we used checkUserLocation
 export const updateVisitStatus = async (req, res) => {
   try {
     const { tripId, destinationId } = req.body;
@@ -92,6 +93,17 @@ export const editTrip = async (req, res) => {
         order: index + 1,
         visitStatus: dest.visitStatus, // reset visitStatus on edit
       }));
+    }
+
+    // Check if all destinations are marked as visited
+    const allDestinationsVisited = trip.tripDestinations.every(
+      (dest) => dest.visitStatus === true
+    );
+
+    // If all are visited, update the trip status
+    if (allDestinationsVisited) {
+      trip.tripStatus = "complete";
+      trip.completedAt = new Date(); // Optional: set completion date
     }
 
     await trip.save();
