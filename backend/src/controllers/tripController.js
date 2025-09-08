@@ -1,5 +1,6 @@
 import Trip from "../models/Trip.js";
 
+
 // Create a new trip
 export const createTrip = async (req, res) => {
   try {
@@ -30,11 +31,11 @@ export const createTrip = async (req, res) => {
   }
 };
 
-// Fetch trips that are active for a user
-export const getUserTrips = async (req, res) => {
+// Fetch trips for the LOGGED IN user
+export const getMyActiveTrips = async (req, res) => {
   try {
-    const { userId } = req.params;
-    const trips = await Trip.find({ userId, tripStatus: "active"  }).populate("tripDestinations.destinationId", "name state location");
+    const userId = req.user._id; // 👈 Gets ID from the token via middleware
+    const trips = await Trip.find({ userId, tripStatus: "active" }).populate("tripDestinations.destinationId", "name state location");
 
     res.status(200).json(trips);
   } catch (err) {
@@ -87,14 +88,15 @@ export const editTrip = async (req, res) => {
 
     if (tripDestinations && tripDestinations.length > 0) {
       trip.tripDestinations = tripDestinations.map((dest, index) => ({
-        destinationId: dest,
+        destinationId: dest.destinationId,
         order: index + 1,
-        visitStatus: false, // reset visitStatus on edit
+        visitStatus: dest.visitStatus, // reset visitStatus on edit
       }));
     }
 
     await trip.save();
-    res.status(200).json({ message: "Trip updated successfully.", trip });
+    const updatedTrip = await Trip.findById(tripId).populate("tripDestinations.destinationId", "name state location");
+    res.status(200).json({ message: "Trip updated successfully.", trip: updatedTrip });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
