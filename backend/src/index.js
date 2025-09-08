@@ -5,6 +5,7 @@ import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
 import destinationRoutes from "./routes/destinationRoutes.js";
 import tripRoutes from "./routes/tripRoutes.js";
+import locationRoutes from "./routes/location.routes.js";
 
 dotenv.config()
 
@@ -16,7 +17,8 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);  //complete
 app.use("/api/users", userRoutes);   //complete
 app.use("/destinations", destinationRoutes); //complete
-app.use("/trips", tripRoutes);
+app.use("/trips", tripRoutes); //complete
+app.use("/api/location", locationRoutes); //complete
 
 const PORT = process.env.PORT || 3000;
 

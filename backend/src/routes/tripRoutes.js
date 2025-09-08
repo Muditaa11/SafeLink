@@ -9,7 +9,7 @@ router.get("/me/active", authMiddleware, getMyActiveTrips);
 router.patch("/visit", updateVisitStatus); // For geofencing updates
 router.put("/:tripId", editTrip);         // Edit trip
 router.post("/complete-destination", authMiddleware, completeTrip); // automatically Complete the trip if all destination status is true
-router.get("/completed", authMiddleware, getUserCompletedTrips); //get completed user trips
+router.get("/me/completed", authMiddleware, getUserCompletedTrips); //get completed user trips
 
 
 // @route   POST /api/trips/check-location
