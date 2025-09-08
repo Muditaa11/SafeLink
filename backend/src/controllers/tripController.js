@@ -107,35 +107,36 @@ export const editTrip = async (req, res) => {
 export const completeTrip = async (req, res) => {
   try {
     const { tripId, destinationId } = req.body;
+    const userId = req.user.id; // ✅ extracted from token
 
-    const trip = await Trip.findById(tripId);
-    if (!trip) return res.status(404).json({ message: "Trip not found." });
+    const trip = await Trip.findOne({ _id: tripId, userId }); // ensure user owns this trip
+    if (!trip) return res.status(404).json({ message: "Trip not found or unauthorized." });
 
-    // Only allow updates if trip is active
     if (trip.tripStatus !== "active") {
       return res.status(403).json({ message: "Cannot update destinations of a completed trip." });
     }
 
-    const dest = trip.tripDestinations.find(d => d.destinationId.toString() === destinationId);
+    const dest = trip.tripDestinations.find(
+      (d) => d.destinationId.toString() === destinationId
+    );
     if (!dest) return res.status(404).json({ message: "Destination not found in this trip." });
 
     dest.visitStatus = true;
 
-    // Check if all destinations are visited
-    const allVisited = trip.tripDestinations.every(d => d.visitStatus === true);
+    const allVisited = trip.tripDestinations.every((d) => d.visitStatus === true);
 
-    // If all visited, mark trip as complete
     if (allVisited) {
       trip.tripStatus = "complete";
+      trip.completedAt = new Date(); // optional field, add in schema
     }
 
     await trip.save();
 
-    res.status(200).json({ 
-      message: allVisited 
-        ? "Destination marked as visited. Trip is now complete!" 
-        : "Destination marked as visited.", 
-      trip 
+    res.status(200).json({
+      message: allVisited
+        ? "Destination marked as visited. Trip is now complete!"
+        : "Destination marked as visited.",
+      trip,
     });
   } catch (err) {
     console.error(err);
@@ -147,7 +148,7 @@ export const completeTrip = async (req, res) => {
 // Fetch completed trips for a user
 export const getUserCompletedTrips = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.user.id; // ✅ from token
 
     const completedTrips = await Trip.find({ userId, tripStatus: "complete" })
       .populate("tripDestinations.destinationId", "name state location");
@@ -159,3 +160,67 @@ export const getUserCompletedTrips = async (req, res) => {
   }
 };
 
+// A helper function for distance calculation
+function getDistanceInMeters(lat1, lon1, lat2, lon2) {
+  const R = 6371e3; // Earth's radius in metres
+  const φ1 = lat1 * Math.PI/180;
+  const φ2 = lat2 * Math.PI/180;
+  const Δφ = (lat2-lat1) * Math.PI/180;
+  const Δλ = (lon2-lon1) * Math.PI/180;
+
+  const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ/2) * Math.sin(Δλ/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+  return R * c;
+}
+
+// New controller to check user's location against destinations
+export const checkUserLocation = async (req, res) => {
+  try {
+    const { latitude, longitude } = req.body;
+    const userId = req.user._id; // from authMiddleware
+    const GEOFENCE_RADIUS_METERS = 500; // Define your radius (e.g., 500 meters)
+
+    // Find the user's currently active trip and populate destination details
+    const trip = await Trip.findOne({ userId, tripStatus: "active" })
+        .populate("tripDestinations.destinationId", "name location");
+        
+    if (!trip) {
+      return res.status(200).json({ message: "No active trip found." });
+    }
+
+    let destinationUpdated = false;
+
+    // Check each unvisited destination
+    for (const dest of trip.tripDestinations) {
+      if (!dest.visitStatus) {
+        const destCoords = dest.destinationId.location.coordinates;
+        const distance = getDistanceInMeters(latitude, longitude, destCoords[1], destCoords[0]); // lon, lat order in GeoJSON
+
+        if (distance <= GEOFENCE_RADIUS_METERS) {
+          dest.visitStatus = true;
+          destinationUpdated = true;
+          console.log(`User entered geofence for: ${dest.destinationId.name}`);
+        }
+      }
+    }
+
+    // If we updated a destination, check if the whole trip is now complete
+    if (destinationUpdated) {
+      const allVisited = trip.tripDestinations.every((d) => d.visitStatus === true);
+      if (allVisited) {
+        trip.tripStatus = "complete";
+        trip.completedAt = new Date();
+      }
+      await trip.save();
+      return res.status(200).json({ message: "Location checked, destination updated.", trip });
+    }
+    
+    res.status(200).json({ message: "Location checked, no destinations nearby." });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
