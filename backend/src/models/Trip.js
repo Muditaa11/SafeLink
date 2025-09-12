@@ -16,6 +16,7 @@ const tripSchema = new mongoose.Schema({
     default: "active", // Default status is active
   },
   createdAt: { type: Date, default: Date.now },
+  completedAt: { type: Date },
 });
 
 const Trip = mongoose.model("Trip", tripSchema);

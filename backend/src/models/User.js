@@ -33,6 +33,9 @@ const userSchema = new Schema(
       conditions: { type: String },
     },
     preferredLanguage: { type: String },
+    images: [{ type: String }], 
+    isVerified: { type: Boolean, default: false },
+    uniqueId: { type: String, unique: true },
   },
   { timestamps: true }
 );
