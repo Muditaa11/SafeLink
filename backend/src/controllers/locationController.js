@@ -1,3 +1,5 @@
+//currently not in use
+
 import UserLocation from '../models/userLocation.model.js';
 import Trip from "../models/Trip.js";
 

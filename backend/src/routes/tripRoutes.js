@@ -15,5 +15,6 @@ router.get("/me/completed", authMiddleware, getUserCompletedTrips); //get comple
 // @route   POST /api/trips/check-location
 // @desc    Checks user's location and updates trip status
 // @access  Private
+//currently not in use
 router.post("/check-location", authMiddleware, checkUserLocation);
 export default router;
