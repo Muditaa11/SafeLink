@@ -1,7 +1,7 @@
 import express from "express";
 import UserLocation from '../models/userLocation.model.js';
 import User from "../models/User.js"; 
-import { authMiddleware } from "../middleware/auth.js";
+import authMiddleware from '../middleware/auth.js'; // Your JWT authentication middleware
 
 const router = express.Router();
 
