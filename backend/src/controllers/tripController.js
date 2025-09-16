@@ -192,7 +192,7 @@ function getDistanceInMeters(lat1, lon1, lat2, lon2) {
 export const checkUserLocation = async (req, res) => {
   try {
     const { latitude, longitude } = req.body;
-    const userId = req.user._id; // from authMiddleware
+    const userId = req.user.id; // from authMiddleware
     const GEOFENCE_RADIUS_METERS = 500; // Define your radius (e.g., 500 meters)
 
     // Find the user's currently active trip and populate destination details

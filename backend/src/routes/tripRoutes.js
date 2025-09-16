@@ -5,7 +5,7 @@ import authMiddleware from "../middleware/auth.js";
 const router = express.Router();
 
 router.post("/", authMiddleware, createTrip); //complete
-router.get("/me/active", authMiddleware, getMyActiveTrips);
+router.get("/me/active", authMiddleware, getMyActiveTrips); //give location with latitude and longitude
 router.patch("/visit", updateVisitStatus); // For geofencing updates
 router.put("/:tripId", editTrip);         // Edit trip
 router.post("/complete-destination", authMiddleware, completeTrip); // automatically Complete the trip if all destination status is true

@@ -1,6 +1,7 @@
 import express from 'express';
 import authMiddleware from '../middleware/auth.js'; // Your JWT authentication middleware
 import UserLocation from '../models/userLocation.model.js';
+import { updateAndCheckLocation } from '../controllers/locationController.js';
 
 const router = express.Router();
 
@@ -45,5 +46,8 @@ router.put('/', authMiddleware, async (req, res) => {
     res.status(500).json({ error: 'SERVER_ERROR' });
   }
 });
+
+// This single POST route now handles both saving the location and checking the trip status.
+router.post("/update-and-check", authMiddleware, updateAndCheckLocation);
 
 export default router;
