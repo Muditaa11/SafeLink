@@ -1,6 +1,6 @@
 import express from "express";
 import SOS from "../models/Sos.js";
-import { authMiddleware } from "../middleware/auth.js";
+import authMiddleware from '../middleware/auth.js'; // Your JWT authentication middleware
 import nodemailer from "nodemailer";
 
 const router = express.Router();
