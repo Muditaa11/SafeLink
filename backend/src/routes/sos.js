@@ -10,10 +10,14 @@ const router = express.Router();
  */
 router.post("/", authMiddleware, async (req, res) => {
   try {
-    const { latitude, longitude, message } = req.body;
+    let { latitude, longitude, message } = req.body;
     const userId = req.user.id;
 
-    if (typeof latitude !== "number" || typeof longitude !== "number") {
+    // 🔹 Convert to number (in case strings come from Postman or frontend)
+    latitude = Number(latitude);
+    longitude = Number(longitude);
+
+    if (isNaN(latitude) || isNaN(longitude)) {
       return res.status(400).json({ error: "Invalid coordinates" });
     }
 
@@ -45,6 +49,7 @@ router.post("/", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "SERVER_ERROR" });
   }
 });
+
 
 /**
  * 📌 Get all active SOS requests (for authority dashboard)
