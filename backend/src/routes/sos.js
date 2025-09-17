@@ -40,10 +40,13 @@ router.post("/", authMiddleware, async (req, res) => {
       from: process.env.SMTP_USER,
       to: "aa11mudit@gmail.com",
       subject: "🚨 SOS Alert!",
-      text: `User ${req.user.name} triggered SOS!\n\nMessage: ${message}\nLocation: ${mapLink}`
+      text: `User ${req.user.id} triggered SOS!\n\nMessage: ${message}\nLocation: ${mapLink}`
     });
 
     res.status(201).json({ success: true, sos });
+    // if (response && response.success) {
+    //   Alert.alert("✅ SOS Sent", "Authorities have been notified.");
+    // }
   } catch (error) {
     console.error("Error in SOS route:", error);
     res.status(500).json({ error: "SERVER_ERROR" });
