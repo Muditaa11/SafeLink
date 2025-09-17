@@ -7,6 +7,7 @@ import destinationRoutes from "./routes/destinationRoutes.js";
 import tripRoutes from "./routes/tripRoutes.js";
 import locationRoutes from "./routes/location.routes.js";
 import userLocationRoutes from "./routes/userLocationRoutes.js";
+import SOSRoutes from "./routes/sos.js";
 
 dotenv.config()
 
@@ -19,8 +20,9 @@ app.use("/api/auth", authRoutes);  //complete
 app.use("/api/users", userRoutes);   //complete
 app.use("/destinations", destinationRoutes); //complete
 app.use("/trips", tripRoutes); //complete
-app.use("/api/location", locationRoutes); //complete
-app.use("/api/user-location", userLocationRoutes); //complete
+app.use("/api/location", locationRoutes); //complete saving user location
+app.use("/api/user-location", userLocationRoutes); //complete fetching user location
+app.use("/api/sos", SOSRoutes); //complete sos routes
 
 const PORT = process.env.PORT || 3000;
 
