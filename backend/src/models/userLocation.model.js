@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+const { Schema } = mongoose;
 
 const userLocationSchema = new mongoose.Schema(
   {
@@ -9,6 +10,13 @@ const userLocationSchema = new mongoose.Schema(
       required: true,
       unique: true, // Each user has only ONE location document
     },
+
+    // 1. Array to store friends' ObjectIds
+    friends: [{
+      type: Schema.Types.ObjectId,
+      ref: 'User' // This tells Mongoose the ObjectIds refer to other Users
+    }],
+    
     // 🌍 Location stored in GeoJSON format
     location: {
       type: {
