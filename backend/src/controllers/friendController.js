@@ -1,32 +1,48 @@
 import UserLocation from "../models/userLocation.model.js";
+import User from "../models/user.model.js";
 
 // Add Friend
 export const addFriends = async (req, res) => {
-    const userId = req.user.id; // User _id from auth
-    const { friendId } = req.body; // Another User _id
+    const userId = req.user.id;
+    const { friendId } = req.body;
 
     if (userId === friendId) {
         return res.status(400).json({ message: "You cannot add yourself as a friend." });
     }
 
     try {
-        // ✅ Find UserLocation docs via `user` field, not _id
         const user = await UserLocation.findOne({ user: userId });
-        const friend = await UserLocation.findOne({ user: friendId });
+
+        // Determine if friendId looks like an ObjectId
+        let friend;
+
+        if (mongoose.Types.ObjectId.isValid(friendId)) {
+            // Try find by user ObjectId
+            friend = await UserLocation.findOne({ user: friendId });
+        }
+
+        if (!friend) {
+            // If not found by ID, try find by user email
+            const User = mongoose.model('User'); // or import your User model
+            const userDoc = await User.findOne({ email: friendId }); // friendId here is email
+            if (userDoc) {
+                friend = await UserLocation.findOne({ user: userDoc._id });
+            }
+        }
 
         if (!friend) {
             return res.status(400).json({ error: 'Friend not found' });
         }
+
         if (!user) {
             return res.status(404).json({ error: 'User location not found' });
         }
 
-        if (user.friends.includes(friendId)) {
+        if (user.friends.includes(friend.user.toString())) {
             return res.status(400).json({ error: 'Friend already added' });
         }
 
-        // ✅ Push friendId (User _id), not UserLocation _id
-        user.friends.push(friendId);
+        user.friends.push(friend.user);
         friend.friends.push(userId);
 
         await user.save();
