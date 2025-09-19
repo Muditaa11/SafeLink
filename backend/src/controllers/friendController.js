@@ -1,6 +1,4 @@
 import UserLocation from "../models/userLocation.model.js";
-import User from "../models/user.model.js";
-
 // Add Friend
 export const addFriends = async (req, res) => {
     const userId = req.user.id;
