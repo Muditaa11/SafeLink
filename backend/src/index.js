@@ -10,6 +10,7 @@ import userLocationRoutes from "./routes/userLocationRoutes.js";
 import SOSRoutes from "./routes/sos.js";
 import friendRoutes from "./routes/friendRoutes.js";
 import adminRoutes from "./routes/kycRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
 
 dotenv.config()
 
@@ -26,7 +27,8 @@ app.use("/api/location", locationRoutes); //complete saving user location
 app.use("/api/user-location", userLocationRoutes); //complete fetching user location
 app.use("/api/sos", SOSRoutes); //complete sos routes
 app.use("/api/friends", friendRoutes); //complete friend routes
-app.use("/api/admin/kyc", adminRoutes);
+app.use("/api/admin/kyc", adminRoutes); //complete kyc routes
+app.use("/api/reviews", reviewRoutes); //complete review routes
 
 
 const PORT = process.env.PORT || 3000;
