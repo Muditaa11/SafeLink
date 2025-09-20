@@ -1,4 +1,4 @@
-import Review from "../models/Review";
+import Review from "../models/Review.js";
 import mongoose from "mongoose";
 import express from "express";
 import authMiddleware from "../middleware/auth.js";
