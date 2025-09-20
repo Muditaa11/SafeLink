@@ -76,3 +76,20 @@ export const getMyActiveTrips = async (req, res) => {
   }
 };
 
+export const getDestinationbyId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const destination = await Destination.findById(id);
+
+    if (!destination) {
+      return res.status(404).json({ message: "Destination not found" });
+    }
+
+    res.json(destination);
+  } catch (err) {
+    console.error("Error fetching destination:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+

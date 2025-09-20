@@ -14,6 +14,18 @@ const destinationSchema = new mongoose.Schema({
       required: true,
     },
   },
+  safety_guidelines: {
+    type: String,
+    required: true
+  },
+  cultural_guidelines: {
+    type: String,
+    required: true
+  },
+  tech_guidelines: {
+    type: String,
+    required: true
+  }
 });
 
 destinationSchema.index({ location: "2dsphere" }); // Needed for geospatial queries
