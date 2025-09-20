@@ -158,4 +158,16 @@ router.put("/proof", async (req, res) => {
   }
 });
 
+router.get("/", async (req, res) => {
+  try {
+    const kyc = await KYC.findOne({ user: req.user._id });
+    if (!kyc) {
+      return res.status(404).json({ message: "KYC details not found." });
+    }
+    return res.status(200).json(kyc);
+  } catch (err) { 
+    console.error("Error fetching KYC details:", err);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+});
 export default router;
