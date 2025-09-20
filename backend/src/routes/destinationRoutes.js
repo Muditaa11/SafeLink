@@ -6,5 +6,5 @@ const router = express.Router();
 
 router.get("/:state", authMiddleware, getDestinationsByState);
 router.get("/trips/active", authMiddleware, getMyActiveTrips);
-router.get("/destinations/:id", authMiddleware, getDestinationbyId);
+router.get("/:id", authMiddleware, getDestinationbyId);
 export default router;
