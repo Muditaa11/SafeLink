@@ -24,7 +24,7 @@ export const getDestinationsByState = async (req, res) => {
 // Get user's active trips with destination details (lat/lng included)
 export const getMyActiveTrips = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     // Step 1: Find user's active trips
     const trips = await Trip.find({ userId, tripStatus: "active" });

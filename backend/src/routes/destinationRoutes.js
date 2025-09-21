@@ -8,4 +8,4 @@ router.get("/:state", authMiddleware, getDestinationsByState);
 router.get("/trips/active", authMiddleware, getMyActiveTrips);
 router.get("/destinations/:id", authMiddleware, getDestinationbyId);
 router.get("/:id/city", getCityByDestinationId);
-export default router;
+export default router; 

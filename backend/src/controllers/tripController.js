@@ -5,7 +5,7 @@ import Trip from "../models/Trip.js";
 export const createTrip = async (req, res) => {
   try {
     const { tripName, tripDestinations } = req.body;
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     if (!tripName || !tripDestinations || !tripDestinations.length) {
       return res.status(400).json({ message: "Trip name and destinations are required." });
@@ -34,7 +34,7 @@ export const createTrip = async (req, res) => {
 // Fetch trips for the LOGGED IN user
 export const getMyActiveTrips = async (req, res) => {
   try {
-    const userId = req.user._id; // 👈 Gets ID from the token via middleware
+    const userId = req.user.id; // 👈 Gets ID from the token via middleware
     const trips = await Trip.find({ userId, tripStatus: "active" }).populate("tripDestinations.destinationId", "name state location");
 
     res.status(200).json(trips);
