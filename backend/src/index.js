@@ -9,9 +9,12 @@ import locationRoutes from "./routes/location.routes.js";
 import userLocationRoutes from "./routes/userLocationRoutes.js";
 import SOSRoutes from "./routes/sos.js";
 import friendRoutes from "./routes/friendRoutes.js";
-import adminRoutes from "./routes/kycRoutes.js";
+
 import reviewRoutes from "./routes/reviewRoutes.js";
 import userKycRoutes from "./routes/userKycRoutes.js";
+import adminRoutes from "./routes/admin/admin.js";
+import masterAdmin from "./routes/admin/masterAdmin.js";
+import authAdmin from "./routes/admin/auth.js";
 
 dotenv.config()
 
@@ -31,6 +34,10 @@ app.use("/api/friends", friendRoutes); //complete friend routes
 app.use("/api/admin/kyc", adminRoutes); //complete kyc routes
 app.use("/api/user/kyc", userKycRoutes); //complete user kyc routes
 app.use("/api/reviews", reviewRoutes); //complete review routes
+
+app.use("/api/admin", adminRoutes);
+app.use("/api/admin/master", masterAdmin);
+app.use("/api/admin/auth", authAdmin);
 
 
 const PORT = process.env.PORT || 3000;
