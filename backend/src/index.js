@@ -11,6 +11,7 @@ import SOSRoutes from "./routes/sos.js";
 import friendRoutes from "./routes/friendRoutes.js";
 import adminRoutes from "./routes/kycRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
+import userKycRoutes from "./routes/userKycRoutes.js";
 
 dotenv.config()
 
@@ -28,6 +29,7 @@ app.use("/api/user-location", userLocationRoutes); //complete fetching user loca
 app.use("/api/sos", SOSRoutes); //complete sos routes
 app.use("/api/friends", friendRoutes); //complete friend routes
 app.use("/api/admin/kyc", adminRoutes); //complete kyc routes
+app.use("/api/user/kyc", userKycRoutes); //complete user kyc routes
 app.use("/api/reviews", reviewRoutes); //complete review routes
 
 

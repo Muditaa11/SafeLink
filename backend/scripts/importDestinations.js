@@ -27,7 +27,8 @@ fs.createReadStream(csvFilePath)
     // UPDATED: Destructure the new guideline fields from the row
     const { 
       name, 
-      state, 
+      state,
+      city,
       latitude, 
       longitude, 
       safety_guidelines, 
@@ -36,7 +37,7 @@ fs.createReadStream(csvFilePath)
     } = row;
 
     // A more robust check to ensure all required fields are present
-    if (!name || !state || !latitude || !longitude || !safety_guidelines || !cultural_guidelines || !tech_guidelines) {
+    if (!name || !state || !latitude || !longitude || !safety_guidelines || !cultural_guidelines || !tech_guidelines || !city) {
         console.warn('Skipping incomplete row:', row);
         return;
     }
@@ -45,6 +46,7 @@ fs.createReadStream(csvFilePath)
     destinations.push({
       name: name.trim(),
       state: state.trim(),
+      city: city.trim(),
       location: {
         type: "Point",
         coordinates: [parseFloat(longitude), parseFloat(latitude)],

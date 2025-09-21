@@ -93,3 +93,19 @@ export const getDestinationbyId = async (req, res) => {
 };
 
 
+// Get city by destination ID
+export const getCityByDestinationId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const destination = await Destination.findById(id).select("city");
+
+    if (!destination) {
+      return res.status(404).json({ message: "Destination not found" });
+    }
+
+    res.status(200).json({ city: destination.city });
+  } catch (err) {
+    console.error("Error fetching city by destination ID:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
