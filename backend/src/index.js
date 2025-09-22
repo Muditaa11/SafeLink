@@ -15,11 +15,13 @@ import userKycRoutes from "./routes/userKycRoutes.js";
 import adminRoutes from "./routes/admin/admin.js";
 import masterAdmin from "./routes/admin/masterAdmin.js";
 import authAdmin from "./routes/admin/auth.js";
+import cors from "cors";
 
 dotenv.config()
 
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 
