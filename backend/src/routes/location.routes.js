@@ -47,6 +47,63 @@ router.put('/', authMiddleware, async (req, res) => {
   }
 });
 
+router.put('/peer', authMiddleware, async (req, res) => {
+  const { packet } = req.body;
+
+  // 1. Validate packet structure
+  if (!packet || !packet.user || !packet.type || !packet.data) {
+    return res.status(400).json({ error: 'BAD_REQUEST' });
+  }
+
+  // 2. Only process gps packets for now
+  if (packet.type !== 'gps') {
+    return res.status(400).json({ error: 'UNSUPPORTED_PACKET_TYPE' });
+  }
+
+  try {
+    // 3. Parse coordinates from packet.data
+    const parts = packet.data.split(',').map(Number); // e.g. [lat, lon, alt]
+    if (parts.length < 2 || parts.some(isNaN)) {
+      return res.status(400).json({ error: 'INVALID_DATA_FORMAT' });
+    }
+
+    const latitude = parts[0];
+    const longitude = parts[1];
+    const altitude = parts[2] || null; // optional
+
+    // 4. Build GeoJSON point
+    const locationData = {
+      type: 'Point',
+      coordinates: [longitude, latitude], // GeoJSON requires [lon, lat]
+    };
+
+    // 5. Update the target user’s location
+    const updatedLocation = await UserLocation.findOneAndUpdate(
+      { user: packet.user }, // target user from packet
+      {
+        $set: {
+          location: locationData,
+          altitude: altitude, // optional field if your schema allows it
+          updatedByPeer: true,
+          updatedAt: new Date(),
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+      }
+    );
+
+    console.log(`Peer location update for user ${packet.user}:`, updatedLocation);
+
+    return res.status(200).json(updatedLocation);
+  } catch (error) {
+    console.error('Error updating peer location:', error);
+    return res.status(500).json({ error: 'SERVER_ERROR' });
+  }
+});
+
+
 // This single POST route now handles both saving the location and checking the trip status.
 router.post("/update-and-check", authMiddleware, updateAndCheckLocation);
 
