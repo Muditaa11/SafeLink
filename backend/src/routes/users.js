@@ -1,6 +1,10 @@
 import express from "express";
 import authMiddleware from "../middleware/auth.js";
 import User from "../models/User.js";
+import KYCRouter from "./kyc.js";
+import PassCode from "../models/PassCode.js";
+import NewPassRequest from "../models/NewPassRequest.js";
+import Pass from "../models/Pass.js";
 
 const router = express.Router();
 
@@ -76,3 +80,67 @@ router.put("/me/profile", authMiddleware, async (req, res) => {
 });
 
 export default router;
+
+router.post("/submit", authMiddleware, async (req, res) => {
+  try {
+    const { passID, userId } = req.body;
+
+    // Check if pass code exists
+    const passCode = await PassCode.findOne({ passID });
+    if (!passCode) return res.status(404).json({ error: "Invalid pass code" });
+
+    // Delete the pass code to prevent reuse
+    await PassCode.deleteOne({ _id: passCode._id });
+
+    // Create a new pass request
+    const newRequest = await NewPassRequest.create({
+      passID,
+      userRef: userId,
+      destinationRef: passCode.destinationRef, // destination auto-filled
+      status: "pending",
+      bandID: null, // Admin will set this on approval
+    });
+
+    return res.json({
+      message: "Pass request submitted successfully",
+      requestId: newRequest._id,
+      status: newRequest.status,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
+
+router.get("/getPass/:passID", authMiddleware,async (req, res) => {
+  try {
+    const { passID } = req.params;
+    const userId = req.user._id; // Assume user is authenticated and req.user is populated
+    console.log("Pass polling: "+passID);
+    console.log("User ID: "+userId);
+
+    // Find pass request by passID and userRef
+    const request = await Pass.findOne({ passID, userRef: userId })
+      .populate("destinationRef", "name state location"); // optional: get destination info
+
+    if (!request) {
+      console.log("No Result");
+      return res.status(404).json({ exists: false, message: "No pass request found for this user" });
+    }
+
+    console.log("Found and returning");
+
+    return res.json({
+      exists: true,
+      request,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
+
+
+router.use("/kyc", KYCRouter);
