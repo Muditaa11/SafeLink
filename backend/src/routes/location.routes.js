@@ -50,19 +50,22 @@ router.put('/', authMiddleware, async (req, res) => {
 router.put('/peer', authMiddleware, async (req, res) => {
   const { packet } = req.body;
 
-  // 1. Validate packet structure
-  if (!packet || !packet.user || !packet.type || !packet.data) {
+  const pPacket=JSON.parse(packet);
+  console.log("Received pPacket: "+pPacket);
+
+  // 1. Validate pPacket structure
+  if (!pPacket || !pPacket.user || !pPacket.type || !pPacket.data) {
     return res.status(400).json({ error: 'BAD_REQUEST' });
   }
 
-  // 2. Only process gps packets for now
-  if (packet.type !== 'gps') {
-    return res.status(400).json({ error: 'UNSUPPORTED_PACKET_TYPE' });
+  // 2. Only process gps pPackets for now
+  if (pPacket.type !== 'gps') {
+    return res.status(400).json({ error: 'UNSUPPORTED_pPacket_TYPE' });
   }
 
   try {
-    // 3. Parse coordinates from packet.data
-    const parts = packet.data.split(',').map(Number); // e.g. [lat, lon, alt]
+    // 3. Parse coordinates from pPacket.data
+    const parts = pPacket.data.split(',').map(Number); // e.g. [lat, lon, alt]
     if (parts.length < 2 || parts.some(isNaN)) {
       return res.status(400).json({ error: 'INVALID_DATA_FORMAT' });
     }
@@ -79,7 +82,7 @@ router.put('/peer', authMiddleware, async (req, res) => {
 
     // 5. Update the target user’s location
     const updatedLocation = await UserLocation.findOneAndUpdate(
-      { user: packet.user }, // target user from packet
+      { user: pPacket.user }, // target user from pPacket
       {
         $set: {
           location: locationData,
@@ -94,7 +97,7 @@ router.put('/peer', authMiddleware, async (req, res) => {
       }
     );
 
-    console.log(`Peer location update for user ${packet.user}:`, updatedLocation);
+    console.log(`Peer location update for user ${pPacket.user}:`, updatedLocation);
 
     return res.status(200).json(updatedLocation);
   } catch (error) {
