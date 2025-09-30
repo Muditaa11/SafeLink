@@ -9,7 +9,7 @@ const router = express.Router();
  * 📌 Get all users with their latest location
  * GET /api/location
  */
-router.get("/t", authMiddleware, async (req, res) => {
+router.get("/", authMiddleware, async (req, res) => {
   console.log("Getting user location");
   try {
     const locations = await UserLocation.find()

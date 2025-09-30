@@ -112,13 +112,14 @@ export const getFriendsLocations = async (req, res) => {
 
         // 2. Take all friendIds directly from user's friends array
         const friendIds = user.friends.map(f => f.toString());
+        const allUserIds = [userId, ...friendIds];
 
-        if (friendIds.length === 0) {
-            return res.status(200).json({ message: "No friends added yet", locations: [] });
+        if (allUserIds.length === 1 && friendIds.length === 0) {
+             console.log("User has no friends, fetching only their location.");
         }
 
-        // 3. Find all locations for those friends
-        const locations = await UserLocation.find({ user: { $in: friendIds } })
+        // 3. Find all locations for those friends and user in single query
+        const locations = await UserLocation.find({ user: { $in: allUserIds } })
             .populate("user", "name email") // include friend's basic info
             .select("user location updatedAt");
 
