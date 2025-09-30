@@ -37,12 +37,16 @@ export const addFriends = async (req, res) => {
             return res.status(404).json({ error: 'User location not found' });
         }
 
-        if (user.friends.includes(friend.user.toString())) {
+        // if (user.friends.includes(friend.user.toString())) {
+        //     return res.status(400).json({ error: 'Friend already added' });
+        // }
+        // FIX: Use .some() and .equals() to properly check for existence
+        if (user.friends.some(id => id.equals(friend.user))) {
             return res.status(400).json({ error: 'Friend already added' });
         }
 
         user.friends.push(friend.user);
-        friend.friends.push(userId);
+        friend.friends.push(user.user);
 
         await user.save();
         await friend.save();
